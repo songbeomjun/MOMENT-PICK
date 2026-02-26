@@ -26,6 +26,13 @@
   <!-- 검색엔진 -->
   <meta name="description" content="오늘의 순간을 특별하게 — 매일 미션으로 하루를 채워보세요">
   <meta name="theme-color" content="#c9a84c">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="모먼트픽">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -673,6 +680,13 @@ MISSIONS.forEach(m => {
 timerRender();
 renderMissions();
 updateProgress();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
 </script>
 </body>
 </html>

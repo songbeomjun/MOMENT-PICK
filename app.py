@@ -196,6 +196,16 @@ def reset():
     return jsonify({'success': True})
 
 
+@app.route('/manifest.json')
+def manifest():
+    return app.send_static_file('manifest.json'), 200, {'Content-Type': 'application/json'}
+
+
+@app.route('/sw.js')
+def service_worker():
+    return app.send_static_file('sw.js'), 200, {'Content-Type': 'application/javascript'}
+
+
 if __name__ == '__main__':
     print("=" * 40)
     print("  MOMENT PICK 서버 시작!")
