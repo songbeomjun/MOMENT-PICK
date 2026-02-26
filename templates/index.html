@@ -48,6 +48,31 @@
     --success: #4caf82;
     --border: rgba(201,168,76,0.2);
   }
+  body.light {
+    --bg: #f7f3ec;
+    --surface: #ffffff;
+    --surface2: #ede8de;
+    --gold: #b8922a;
+    --gold-light: #c9a84c;
+    --gold-dim: rgba(184,146,42,0.12);
+    --text: #1a1612;
+    --text-muted: #7a6e5f;
+    --accent: #5c4eb8;
+    --success: #2e8a5c;
+    --border: rgba(184,146,42,0.25);
+  }
+  body.light::before { background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%); }
+  body.light::after  { background: radial-gradient(ellipse, rgba(123,108,212,0.06) 0%, transparent 70%); }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 999;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: var(--surface);
+    cursor: pointer; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .3s, border-color .3s, transform .2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .theme-toggle:hover { transform: scale(1.1); border-color: var(--gold); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
@@ -220,6 +245,8 @@
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="테마 변경">🌙</button>
 
 <header>
   <div class="logo-subtitle">✦ Daily Mission App ✦</div>
@@ -676,6 +703,21 @@ MISSIONS.forEach(m => {
   if (!state[String(m.id)]) state[String(m.id)] = { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
   state[String(m.id)].expanded = false;
 });
+
+// ── 테마 토글 ──
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+// 저장된 테마 불러오기
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('themeToggle').textContent = '☀️';
+  }
+})();
 
 timerRender();
 renderMissions();

@@ -78,6 +78,16 @@ AUTO_MISSION_POOL = [
     {'icon': '🎨', 'name': '낙서 또는 드로잉', 'desc': '뭔가를 그리고 사진으로 찍어 남겨보세요', 'type': 'photo', 'placeholder': ''},
     {'icon': '🏠', 'name': '공간 정리 인증', 'desc': '책상이든 방이든 한 곳을 정리하고 완료 체크!', 'type': 'check', 'placeholder': ''},
     {'icon': '📸', 'name': '지금 이 순간 포착', 'desc': '지금 눈앞에 보이는 것을 사진으로 남겨보세요', 'type': 'photo', 'placeholder': ''},
+    {'icon': '☀️', 'name': '오늘의 날씨 감상', 'desc': '오늘 날씨를 보며 느낀 감정을 적어보세요', 'type': 'text', 'placeholder': '오늘 날씨가 주는 느낌은...'},
+    {'icon': '🧠', 'name': '오늘 고민 해결하기', 'desc': '요즘 고민 중인 것을 써보고 해결책을 찾아보세요', 'type': 'text', 'placeholder': '고민:
+해결책:'},
+    {'icon': '💃', 'name': '오늘의 기분 점수', 'desc': '오늘 기분을 1~10점으로 점수 매기고 이유를 적어보세요', 'type': 'text', 'placeholder': '점수: / 이유:'},
+    {'icon': '🌺', 'name': '예쁜 것 찾기', 'desc': '오늘 주변에서 아름다운 것을 사진으로 남겨보세요', 'type': 'photo', 'placeholder': ''},
+    {'icon': '📞', 'name': '그리운 사람에게 연락', 'desc': '오랫동안 연락 못 했던 사람에게 안부를 전해봤나요?', 'type': 'check', 'placeholder': ''},
+    {'icon': '✨', 'name': '오늘의 작은 성공', 'desc': '오늘 이뤄낸 작은 성취를 기록해보세요', 'type': 'text', 'placeholder': '오늘 내가 해낸 것은...'},
+    {'icon': '🎬', 'name': '인상 깊은 장면 기록', 'desc': '오늘 본 영상이나 영화의 인상 깊은 장면을 적어보세요', 'type': 'text', 'placeholder': '장면과 그 이유는...'},
+    {'icon': '🛏️', 'name': '일찍 자기 도전', 'desc': '오늘은 평소보다 30분 일찍 자보기!', 'type': 'check', 'placeholder': ''},
+    {'icon': '🧊', 'name': '냉장고 정리', 'desc': '냉장고를 한 번 정리하고 완료 체크!', 'type': 'check', 'placeholder': ''},
 ]
 
 
