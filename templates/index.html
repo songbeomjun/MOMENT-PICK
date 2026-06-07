@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOMENT PICK</title>
+
+  <!-- 파비콘 -->
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+
+  <!-- OG / SNS 미리보기 -->
+  <meta property="og:title" content="MOMENT PICK">
+  <meta property="og:description" content="오늘의 순간을 특별하게 — 매일 미션으로 하루를 채워보세요">
+  <meta property="og:image" content="/static/og-image.png">
+  <meta property="og:type" content="website">
+
+  <!-- 트위터 카드 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MOMENT PICK">
+  <meta name="twitter:description" content="오늘의 순간을 특별하게 — 매일 미션으로 하루를 채워보세요">
+  <meta name="twitter:image" content="/static/og-image.png">
+
+  <!-- 검색엔진 -->
+  <meta name="description" content="오늘의 순간을 특별하게 — 매일 미션으로 하루를 채워보세요">
+  <meta name="theme-color" content="#c9a84c">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="모먼트픽">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131c;
+    --surface2: #1c1c2a;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --text: #f0ead8;
+    --text-muted: #8a8272;
+    --accent: #7b6cd4;
+    --success: #4caf82;
+    --border: rgba(201,168,76,0.2);
+  }
+  body.light {
+    --bg: #f7f3ec;
+    --surface: #ffffff;
+    --surface2: #ede8de;
+    --gold: #b8922a;
+    --gold-light: #c9a84c;
+    --gold-dim: rgba(184,146,42,0.12);
+    --text: #1a1612;
+    --text-muted: #7a6e5f;
+    --accent: #5c4eb8;
+    --success: #2e8a5c;
+    --border: rgba(184,146,42,0.25);
+  }
+  body.light::before { background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%); }
+  body.light::after  { background: radial-gradient(ellipse, rgba(123,108,212,0.06) 0%, transparent 70%); }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 999;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: var(--surface);
+    cursor: pointer; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .3s, border-color .3s, transform .2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .theme-toggle:hover { transform: scale(1.1); border-color: var(--gold); }
+  .cal-toggle {
+    position: fixed; top: 68px; right: 16px; z-index: 999;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: var(--surface);
+    cursor: pointer; font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .3s, border-color .3s, transform .2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .cal-toggle:hover { transform: scale(1.1); border-color: var(--gold); }
+
+  /* 캘린더 모달 */
+  .cal-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .cal-modal-overlay.show { display: flex; }
+  .cal-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; width: 100%; max-width: 380px;
+    max-height: 80vh; overflow-y: auto;
+  }
+  .cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .cal-header h2 { font-size: 18px; color: var(--gold-light); }
+  .cal-nav { display: flex; align-items: center; gap: 12px; }
+  .cal-nav button {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); cursor: pointer; padding: 4px 10px; font-size: 14px;
+    transition: border-color .2s;
+  }
+  .cal-nav button:hover { border-color: var(--gold); color: var(--gold); }
+  .cal-nav span { font-size: 14px; color: var(--gold); font-weight: 700; min-width: 80px; text-align: center; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px; }
+  .cal-day-label { text-align: center; font-size: 10px; color: var(--text-muted); padding: 4px 0; }
+  .cal-day {
+    aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; font-size: 12px;
+    cursor: pointer; transition: background .15s; position: relative;
+    color: var(--text-muted);
+  }
+  .cal-day.today { border: 1.5px solid var(--gold); color: var(--gold); font-weight: 700; }
+  .cal-day.has-record { background: var(--gold-dim); color: var(--text); }
+  .cal-day.has-record::after {
+    content: '✦'; position: absolute; bottom: 2px; font-size: 7px; color: var(--gold);
+  }
+  .cal-day:hover { background: var(--surface2); }
+  .cal-day.empty { cursor: default; }
+  .cal-record { margin-top: 12px; padding: 14px; background: var(--surface2); border-radius: 12px; }
+  .cal-record h3 { font-size: 13px; color: var(--gold); margin-bottom: 8px; }
+  .cal-record-item { font-size: 12px; color: var(--text-muted); padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .cal-record-item:last-child { border-bottom: none; }
+  .cal-close { margin-top: 16px; width: 100%; padding: 12px; background: var(--gold-dim); border: 1px solid var(--border); border-radius: 10px; color: var(--gold); font-size: 14px; cursor: pointer; transition: background .2s; }
+  .cal-close:hover { background: rgba(201,168,76,0.25); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20%; left: -20%;
+    width: 60%; height: 60%;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.06) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%; right: -20%;
+    width: 60%; height: 60%;
+    background: radial-gradient(ellipse, rgba(123,108,212,0.07) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  header {
+    width: 100%; max-width: 480px;
+    padding: 48px 24px 24px;
+    position: relative; z-index: 1; text-align: center;
+  }
+  .logo-subtitle { font-size: 10px; letter-spacing: 6px; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; opacity: .8; }
+  .logo { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 900; letter-spacing: 2px; color: var(--text); line-height: 1; }
+  .logo span { color: var(--gold); }
+  .logo-tagline { font-size: 11px; letter-spacing: 3px; color: var(--text-muted); margin-top: 8px; text-transform: uppercase; }
+  .date-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-dim); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 12px; color: var(--gold-light); margin-top: 20px; }
+  .container { width: 100%; max-width: 480px; padding: 16px 20px; position: relative; z-index: 1; flex: 1; }
+
+  /* Progress */
+  .progress-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+  .progress-label span:last-child { color: var(--gold); font-weight: 700; }
+  .progress-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+
+  /* Timer */
+  .timer-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 20px; text-align: center; }
+  .timer-label { font-size: 11px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px; }
+  .timer-display { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: var(--gold-light); letter-spacing: 4px; line-height: 1; margin-bottom: 6px; transition: color .3s; }
+  .timer-display.done { color: var(--success); }
+  .timer-display.paused { color: var(--text-muted); }
+  .timer-ring { display: flex; justify-content: center; margin-bottom: 16px; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle.bg { fill: none; stroke: var(--surface2); stroke-width: 4; }
+  .timer-ring circle.progress { fill: none; stroke: var(--gold); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 220; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke .3s; }
+  .timer-ring circle.progress.done { stroke: var(--success); }
+  .timer-buttons { display: flex; gap: 10px; justify-content: center; }
+  .btn-timer { padding: 10px 22px; border-radius: 10px; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); transition: background .2s, color .2s, border-color .2s; }
+  .btn-timer-start { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: #0a0a0f; border-color: transparent; }
+  .btn-timer-start:hover { opacity: .88; }
+  .btn-timer-pause { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  .btn-timer-pause:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-timer-reset { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  .btn-timer-reset:hover { border-color: rgba(201,168,76,.4); color: var(--text); }
+
+  /* Pick section */
+  .pick-section { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 20px; }
+  .pick-section h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--gold-light); margin-bottom: 6px; }
+  .pick-section p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  .btn-pick { padding: 16px 40px; background: linear-gradient(135deg, #7b6cd4, #a899e8); color: white; border: none; border-radius: 14px; font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 2px; transition: transform .2s, box-shadow .2s; box-shadow: 0 4px 20px rgba(123,108,212,.3); }
+  .btn-pick:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(123,108,212,.4); }
+  .btn-pick:active { transform: scale(.97); }
+
+  /* Section title */
+  .section-title { font-size: 11px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px; padding-left: 4px; }
+
+  /* Mission cards */
+  .missions { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .mission-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+  .mission-card:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(201,168,76,.1); }
+  .mission-card.active { border-color: var(--gold); box-shadow: 0 0 24px rgba(201,168,76,.15); }
+  .mission-card.completed { border-color: var(--success); opacity: .8; }
+  .mission-header { display: flex; align-items: center; gap: 14px; padding: 18px 20px; cursor: pointer; user-select: none; }
+  .mission-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border); transition: transform .2s; }
+  .mission-card.active .mission-icon, .mission-card:hover .mission-icon { transform: scale(1.1); }
+  .mission-card.completed .mission-icon { background: rgba(76,175,130,.1); border-color: var(--success); }
+  .mission-info { flex: 1; }
+  .mission-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .mission-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .mission-status { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 8px; flex-shrink: 0; }
+  .status-pending { background: var(--gold-dim); color: var(--gold); }
+  .status-active { background: rgba(123,108,212,.2); color: #a899e8; }
+  .status-done { background: rgba(76,175,130,.15); color: var(--success); }
+  .mission-expand { display: none; padding: 0 20px 20px; animation: slideDown .25s ease; }
+  .mission-expand.show { display: block; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .expand-divider { height: 1px; background: var(--border); margin-bottom: 16px; }
+  .mission-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; line-height: 1.7; resize: none; min-height: 100px; transition: border-color .2s; outline: none; }
+  .mission-textarea:focus { border-color: var(--gold); }
+  .mission-textarea::placeholder { color: var(--text-muted); }
+  .char-count { text-align: right; font-size: 11px; color: var(--text-muted); margin-top: 6px; margin-bottom: 12px; }
+  .btn-complete { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: #0a0a0f; border: none; border-radius: 12px; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 1px; transition: opacity .2s, transform .1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-complete:hover { opacity: .9; }
+  .btn-complete:active { transform: scale(.98); }
+  .photo-upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; margin-bottom: 12px; }
+  .photo-upload-area:hover { border-color: var(--gold); background: var(--gold-dim); }
+  .photo-upload-area.has-file { border-color: var(--success); border-style: solid; }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-text { font-size: 13px; color: var(--text-muted); }
+  .upload-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; opacity: .6; }
+  .action-card { background: var(--surface2); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 12px; }
+  .action-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+  .btn-action { padding: 12px 28px; background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 10px; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s, color .2s; }
+  .btn-action:hover { background: var(--gold); color: #0a0a0f; }
+  .result-box { background: var(--gold-dim); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 14px; color: var(--gold-light); margin-top: 12px; display: none; animation: fadeIn .3s ease; }
+  .result-box.show { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Add buttons */
+  .add-buttons-row { display: flex; gap: 10px; margin-bottom: 24px; }
+  .btn-add-mission { flex: 1; padding: 14px 12px; background: transparent; border: 2px dashed var(--border); border-radius: 16px; color: var(--text-muted); font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: border-color .2s, color .2s, background .2s; letter-spacing: .5px; line-height: 1.4; text-align: center; }
+  .btn-add-manual:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+  .btn-add-auto { border-color: rgba(123,108,212,.3); color: #a899e8; }
+  .btn-add-auto:hover { border-color: var(--accent); color: var(--accent); background: rgba(123,108,212,.1); }
+  .btn-add-plus { font-size: 16px; line-height: 1; }
+  .btn-add-auto.loading { opacity: .6; cursor: not-allowed; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: .6; } 50% { opacity: .3; } }
+
+  /* Completed glow */
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  .completed-glow { background: linear-gradient(90deg, var(--success), #7de8b5, var(--success)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2s linear infinite; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--success); color: white; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; z-index: 999; transition: transform .35s cubic-bezier(.4,0,.2,1); white-space: nowrap; box-shadow: 0 8px 24px rgba(76,175,130,.4); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border: 1px solid var(--gold); border-radius: 24px; padding: 32px 28px; max-width: 380px; width: 100%; text-align: center; transform: scale(.9); transition: transform .3s; }
+  .modal-overlay.show .modal { transform: scale(1); }
+  .modal-icon { font-size: 48px; margin-bottom: 16px; }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--gold-light); margin-bottom: 10px; }
+  .modal p { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; }
+  .btn-modal { padding: 14px 32px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: #0a0a0f; border: none; border-radius: 12px; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+  .btn-modal:hover { opacity: .85; }
+
+  /* Add mission modal */
+  .add-modal { background: var(--surface); border: 1px solid var(--gold); border-radius: 24px; padding: 28px 24px; max-width: 420px; width: 100%; transform: scale(.9); transition: transform .3s; max-height: 90vh; overflow-y: auto; }
+  .modal-overlay.show .add-modal { transform: scale(1); }
+  .add-modal h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold-light); margin-bottom: 20px; text-align: center; }
+  .add-field { margin-bottom: 14px; }
+  .add-field label { display: block; font-size: 11px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+  .add-field input, .add-field textarea, .add-field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; outline: none; transition: border-color .2s; }
+  .add-field input:focus, .add-field textarea:focus, .add-field select:focus { border-color: var(--gold); }
+  .add-field textarea { resize: none; min-height: 70px; line-height: 1.6; }
+  .add-field select option { background: var(--surface2); }
+  .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+  .icon-option { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .15s, background .15s; }
+  .icon-option:hover { border-color: var(--gold); background: var(--gold-dim); }
+  .icon-option.selected { border-color: var(--gold); background: var(--gold-dim); box-shadow: 0 0 8px rgba(201,168,76,.3); }
+  .add-modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-add-cancel { flex: 1; padding: 13px; background: transparent; border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color .2s, color .2s; }
+  .btn-add-cancel:hover { border-color: var(--gold); color: var(--text); }
+  .btn-add-confirm { flex: 2; padding: 13px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border: none; border-radius: 10px; color: #0a0a0f; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s; letter-spacing: 1px; }
+  .btn-add-confirm:hover { opacity: .88; }
+
+  footer { width: 100%; max-width: 480px; text-align: center; padding: 24px; font-size: 11px; color: var(--text-muted); opacity: .5; position: relative; z-index: 1; letter-spacing: 2px; }
+  .photo-preview {
+    width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 10px;
+    position: relative; background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+  .photo-preview img {
+    width: 100%; max-height: 260px; object-fit: cover; display: block;
+    border-radius: 12px;
+  }
+  .photo-preview-change {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(10,10,15,0.7); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--gold); font-size: 11px;
+    padding: 4px 10px; cursor: pointer; backdrop-filter: blur(4px);
+  }
+
+  /* ── 스트릭 & 레벨 ── */
+  .header-badges { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px 0 0; }
+  .streak-badge, .level-badge { padding:5px 14px; border-radius:20px; font-size:13px; font-weight:600; border:1px solid var(--gold); color:var(--gold); background:var(--gold-dim); letter-spacing:.5px; }
+
+  /* ── 하단 네비게이션 ── */
+  .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:var(--surface); border-top:1px solid var(--border); display:flex; justify-content:space-around; align-items:center; padding:8px 0 calc(8px + env(safe-area-inset-bottom)); z-index:100; backdrop-filter:blur(20px); }
+  .nav-btn { display:flex; flex-direction:column; align-items:center; gap:2px; background:none; border:none; color:var(--text-muted); font-size:10px; font-family:'Noto Sans KR',sans-serif; cursor:pointer; padding:6px 10px; border-radius:12px; transition:all .2s; min-width:54px; }
+  .nav-btn:hover { color:var(--gold); background:var(--gold-dim); }
+  .nav-btn.active { color:var(--gold); }
+  .nav-btn.active .nav-icon { background:var(--gold-dim); border-radius:12px; }
+  .nav-icon { font-size:20px; width:36px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:10px; transition:background .2s; }
+  .nav-label { font-size:10px; font-weight:500; }
+
+  /* 더보기 드로어 */
+  .more-drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:150; opacity:0; pointer-events:none; transition:opacity .25s; }
+  .more-drawer-overlay.show { opacity:1; pointer-events:all; }
+  .more-drawer { position:fixed; bottom:0; left:50%; transform:translateX(-50%) translateY(100%); width:100%; max-width:480px; background:var(--surface); border-radius:24px 24px 0 0; border:1px solid var(--border); border-bottom:none; padding:16px 20px calc(24px + env(safe-area-inset-bottom)); z-index:151; transition:transform .3s cubic-bezier(.34,1.2,.64,1); }
+  .more-drawer-overlay.show .more-drawer { transform:translateX(-50%) translateY(0); }
+  .more-drawer-handle { width:36px; height:4px; background:var(--border); border-radius:4px; margin:0 auto 20px; }
+  .more-drawer-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .more-item { display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 6px; background:var(--surface2); border:1px solid var(--border); border-radius:14px; cursor:pointer; transition:border-color .15s; }
+  .more-item:hover { border-color:var(--gold); background:var(--gold-dim); }
+  .more-item-icon { font-size:24px; }
+  .more-item-label { font-size:11px; color:var(--text-muted); font-weight:500; }
+  .container { padding-bottom:80px; }
+
+  /* ── 통계 모달 ── */
+  .stats-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .stats-modal-overlay.show { opacity:1; pointer-events:all; }
+  .stats-modal { background:var(--surface); border-radius:24px 24px 0 0; border:1px solid var(--border); width:100%; max-width:480px; max-height:85vh; overflow-y:auto; padding:28px 20px 40px; }
+  .stats-modal h2 { text-align:center; font-size:18px; margin-bottom:20px; color:var(--gold); }
+  .stats-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:24px; }
+  .stat-card { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:12px 6px; text-align:center; }
+  .stat-num { font-size:22px; font-weight:700; color:var(--text); }
+  .stat-lbl { font-size:11px; color:var(--text-muted); margin-top:4px; }
+  .stats-chart-title { font-size:14px; color:var(--text-muted); margin-bottom:12px; }
+  .stats-chart { display:flex; gap:8px; align-items:flex-end; height:120px; }
+  .stat-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+  .stat-bar-val { font-size:11px; color:var(--gold); font-weight:600; min-height:16px; }
+  .stat-bar-outer { width:100%; flex:1; background:var(--surface2); border-radius:6px; overflow:hidden; display:flex; align-items:flex-end; }
+  .stat-bar-inner { width:100%; background:linear-gradient(to top,var(--gold),var(--gold-light)); border-radius:6px; transition:height .5s; min-height:4px; }
+  .stat-bar-lbl { font-size:11px; color:var(--text-muted); }
+
+  /* ── 기분 모달 ── */
+  .mood-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .mood-modal-overlay.show { opacity:1; pointer-events:all; }
+  .mood-modal { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:28px 20px; width:90%; max-width:360px; text-align:center; }
+  .mood-modal h2 { font-size:18px; color:var(--gold); margin-bottom:8px; }
+  .mood-modal p { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+  .mood-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+  .mood-btn { font-size:36px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:10px; cursor:pointer; transition:transform .15s,border-color .15s; }
+  .mood-btn:hover { transform:scale(1.15); border-color:var(--gold); }
+
+  /* ── 루틴 모달 ── */
+  .routine-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .routine-modal-overlay.show { opacity:1; pointer-events:all; }
+  .routine-modal { background:var(--surface); border-radius:24px 24px 0 0; border:1px solid var(--border); width:100%; max-width:480px; max-height:80vh; overflow-y:auto; padding:28px 20px 40px; }
+  .routine-modal h2 { text-align:center; font-size:18px; color:var(--gold); margin-bottom:6px; }
+  .routine-modal p { text-align:center; font-size:12px; color:var(--text-muted); margin-bottom:20px; }
+  .routine-item { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; font-size:14px; color:var(--text); }
+  .routine-item button { background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; padding:0 4px; }
+  .routine-item button:hover { color:#e55; }
+  .routine-add-row { display:flex; gap:8px; margin-top:16px; }
+  .routine-add-row input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:14px; }
+  .routine-icon-input { width:54px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px; color:var(--text); font-size:20px; text-align:center; }
+  .routine-add-btn { padding:10px 16px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:10px; color:#0a0a0f; font-weight:700; font-size:14px; cursor:pointer; }
+  .modal-close-btn { display:block; width:100%; margin-top:16px; padding:12px; background:transparent; border:1px solid var(--border); border-radius:10px; color:var(--text-muted); font-family:'Noto Sans KR',sans-serif; font-size:14px; cursor:pointer; }
+  .modal-close-btn:hover { border-color:var(--gold); color:var(--text); }
+
+  /* ── 온보딩 ── */
+  .onboarding-overlay { position:fixed; inset:0; background:rgba(10,10,15,.97); z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .4s; }
+  .onboarding-overlay.show { opacity:1; pointer-events:all; }
+  .onboard-slide { display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 40px; max-width:380px; }
+  .onboard-icon { font-size:80px; margin-bottom:28px; }
+  .onboard-slide h2 { font-size:22px; color:var(--gold); margin-bottom:14px; }
+  .onboard-slide p { font-size:15px; color:var(--text-muted); line-height:1.7; margin-bottom:32px; }
+  .onboard-next-btn { width:100%; padding:15px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:14px; color:#0a0a0f; font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:1px; }
+  .onboard-skip { margin-top:16px; background:none; border:none; color:var(--text-muted); font-size:13px; cursor:pointer; text-decoration:underline; }
+  .onboard-dot { margin-top:24px; color:var(--text-muted); font-size:13px; }
+
+  /* ── 완료 모달 공유 버튼 ── */
+  .btn-modal-share { width:100%; margin-top:10px; padding:12px; background:transparent; border:1px solid var(--gold); border-radius:12px; color:var(--gold); font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
+  .btn-modal-share:hover { background:var(--gold-dim); }
+
+  /* ── 로그인 화면 ── */
+  .auth-overlay { position:fixed; inset:0; background:#0a0a0f; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+  .auth-overlay.hidden { display:none; }
+  .auth-box { width:100%; max-width:380px; }
+  .auth-logo { text-align:center; margin-bottom:32px; }
+  .auth-logo h1 { font-size:28px; font-weight:800; letter-spacing:4px; color:var(--gold); }
+  .auth-logo p { font-size:13px; color:var(--text-muted); margin-top:6px; }
+  .auth-tabs { display:flex; background:var(--surface2); border-radius:12px; padding:4px; margin-bottom:24px; }
+  .auth-tab { flex:1; padding:10px; text-align:center; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; color:var(--text-muted); transition:all .2s; border:none; background:none; font-family:'Noto Sans KR',sans-serif; }
+  .auth-tab.active { background:var(--gold); color:#0a0a0f; }
+  .auth-field { margin-bottom:14px; }
+  .auth-field label { display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px; letter-spacing:.5px; }
+  .auth-field input { width:100%; padding:13px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:15px; box-sizing:border-box; transition:border-color .2s; }
+  .auth-field input:focus { outline:none; border-color:var(--gold); }
+  .auth-btn { width:100%; padding:14px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:12px; color:#0a0a0f; font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:700; cursor:pointer; letter-spacing:1px; margin-top:8px; transition:opacity .2s; }
+  .auth-btn:hover { opacity:.9; }
+  .auth-btn:disabled { opacity:.6; cursor:not-allowed; }
+  .auth-error { background:rgba(229,85,85,.15); border:1px solid rgba(229,85,85,.3); border-radius:10px; padding:10px 14px; color:#e55555; font-size:13px; margin-bottom:12px; display:none; }
+  .auth-error.show { display:block; }
+  .auth-hint { text-align:center; font-size:12px; color:var(--text-muted); margin-top:16px; }
+
+  /* ── 유저 정보 헤더 ── */
+  .user-info-bar { display:flex; align-items:center; justify-content:center; gap:10px; margin:8px 0; }
+  .user-name-badge { font-size:13px; color:var(--gold); font-weight:600; }
+  .logout-btn { font-size:11px; color:var(--text-muted); background:none; border:1px solid var(--border); border-radius:6px; padding:3px 8px; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
+  .logout-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+  .guest-btn { width:100%; padding:12px; background:transparent; border:1px solid var(--border); border-radius:12px; color:var(--text-muted); font-family:'Noto Sans KR',sans-serif; font-size:14px; cursor:pointer; margin-top:10px; transition:border-color .2s, color .2s; }
+  .guest-btn:hover { border-color:var(--gold); color:var(--text); }
+  .guest-divider { display:flex; align-items:center; gap:10px; margin:16px 0 6px; color:var(--text-muted); font-size:12px; }
+  .guest-divider::before, .guest-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .guest-warn-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:10000; display:flex; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .2s; }
+  .guest-warn-overlay.show { opacity:1; pointer-events:all; }
+  .guest-warn-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:28px 24px; width:100%; max-width:340px; text-align:center; }
+  .guest-warn-icon { font-size:48px; margin-bottom:12px; }
+  .guest-warn-box h3 { font-size:17px; color:var(--text); margin-bottom:10px; }
+  .guest-warn-box p { font-size:13px; color:var(--text-muted); line-height:1.7; margin-bottom:20px; }
+  .guest-warn-box p strong { color:#e5a040; }
+  .guest-warn-btns { display:flex; flex-direction:column; gap:10px; }
+  .guest-warn-confirm { padding:13px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:12px; color:#0a0a0f; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; }
+  .guest-warn-cancel { padding:12px; background:transparent; border:1px solid var(--border); border-radius:12px; color:var(--text-muted); font-family:'Noto Sans KR',sans-serif; font-size:14px; cursor:pointer; }
+  .guest-warn-cancel:hover { border-color:var(--gold); color:var(--text); }
+  .guest-mode-bar { text-align:center; font-size:12px; color:var(--text-muted); margin:6px 0 0; }
+
+  /* ── 테마 컬러 ── */
+  body.theme-purple { --gold:#a78bfa; --gold-light:#c4b5fd; --gold-dim:rgba(167,139,250,.12); --success:#a78bfa; }
+  body.theme-blue   { --gold:#60a5fa; --gold-light:#93c5fd; --gold-dim:rgba(96,165,250,.12);  --success:#60a5fa; }
+  body.theme-green  { --gold:#34d399; --gold-light:#6ee7b7; --gold-dim:rgba(52,211,153,.12);  --success:#34d399; }
+  body.theme-pink   { --gold:#f472b6; --gold-light:#f9a8d4; --gold-dim:rgba(244,114,182,.12); --success:#f472b6; }
+  body.theme-coral  { --gold:#fb923c; --gold-light:#fdba74; --gold-dim:rgba(251,146,60,.12);  --success:#fb923c; }
+
+  /* ── 오늘의 명언 ── */
+  .quote-section { background:var(--gold-dim); border:1px solid var(--border); border-radius:14px; padding:14px 18px; margin-bottom:16px; text-align:center; }
+  .quote-text { font-size:14px; color:var(--text); line-height:1.6; font-style:italic; }
+  .quote-author { font-size:11px; color:var(--text-muted); margin-top:6px; }
+
+  /* ── 카테고리 필터 ── */
+  .cat-filter { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+  .cat-btn { padding:5px 13px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); cursor:pointer; transition:all .15s; font-family:'Noto Sans KR',sans-serif; }
+  .cat-btn:hover, .cat-btn.active { background:var(--gold-dim); border-color:var(--gold); color:var(--gold); }
+
+  /* ── 미션 난이도 뱃지 ── */
+  .diff-badge { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:700; margin-left:6px; vertical-align:middle; }
+  .diff-1 { background:rgba(52,211,153,.15); color:#059669; }
+  .diff-2 { background:rgba(251,191,36,.15); color:#d97706; }
+  .diff-3 { background:rgba(248,113,113,.15); color:#dc2626; }
+
+  /* ── 테마 선택 모달 ── */
+  .theme-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .theme-modal-overlay.show { opacity:1; pointer-events:all; }
+  .theme-modal { background:var(--surface); border-radius:24px 24px 0 0; border:1px solid var(--border); width:100%; max-width:480px; padding:28px 20px 40px; }
+  .theme-modal h2 { text-align:center; font-size:18px; color:var(--gold); margin-bottom:20px; }
+  .theme-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .theme-option { padding:14px 8px; border-radius:14px; border:2px solid transparent; cursor:pointer; text-align:center; transition:border-color .15s; }
+  .theme-option.active { border-color:var(--gold); }
+  .theme-dot { width:32px; height:32px; border-radius:50%; margin:0 auto 8px; }
+  .theme-option span { font-size:13px; color:var(--text-muted); }
+
+  /* ── 친구 모달 ── */
+  .friend-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .friend-modal-overlay.show { opacity:1; pointer-events:all; }
+  .friend-modal { background:var(--surface); border-radius:24px 24px 0 0; border:1px solid var(--border); width:100%; max-width:480px; max-height:80vh; overflow-y:auto; padding:28px 20px 40px; }
+  .friend-modal h2 { text-align:center; font-size:18px; color:var(--gold); margin-bottom:6px; }
+  .friend-modal > p { text-align:center; font-size:12px; color:var(--text-muted); margin-bottom:20px; }
+  .my-code-box { background:var(--gold-dim); border:1px solid var(--gold); border-radius:12px; padding:14px; text-align:center; margin-bottom:20px; }
+  .my-code-label { font-size:11px; color:var(--text-muted); margin-bottom:6px; }
+  .my-code-value { font-size:26px; font-weight:800; letter-spacing:4px; color:var(--gold); cursor:pointer; }
+  .my-code-copy { font-size:11px; color:var(--text-muted); margin-top:4px; }
+  .friend-add-row { display:flex; gap:8px; margin-bottom:20px; }
+  .friend-add-row input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:var(--text); font-family:'Noto Sans KR',sans-serif; font-size:15px; letter-spacing:2px; text-transform:uppercase; }
+  .friend-add-btn { padding:10px 16px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:10px; color:#0a0a0f; font-weight:700; font-size:14px; cursor:pointer; }
+  .friend-item { display:flex; align-items:center; gap:12px; padding:12px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; margin-bottom:8px; }
+  .friend-avatar { width:40px; height:40px; border-radius:50%; background:var(--gold-dim); border:1px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .friend-info { flex:1; }
+  .friend-name { font-size:14px; font-weight:600; color:var(--text); }
+  .friend-stats { font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .friend-remove { background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; padding:4px; }
+
+  /* ── 파티클 캔버스 ── */
+  #particleCanvas { position:fixed; inset:0; pointer-events:none; z-index:9998; }
+
+  /* ── 설정 모달 ── */
+  .settings-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .settings-modal-overlay.show { opacity:1; pointer-events:all; }
+  .settings-modal { background:var(--surface); border-radius:24px 24px 0 0; border:1px solid var(--border); width:100%; max-width:480px; padding:28px 20px 40px; }
+  .settings-modal h2 { text-align:center; font-size:18px; color:var(--gold); margin-bottom:20px; }
+  .settings-section { margin-bottom:20px; }
+  .settings-label { font-size:11px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
+  .settings-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); font-size:14px; color:var(--text); }
+  .toggle-wrap { position:relative; width:44px; height:24px; }
+  .toggle-wrap input { opacity:0; width:0; height:0; }
+  .toggle-slider { position:absolute; inset:0; background:var(--border); border-radius:24px; cursor:pointer; transition:.3s; }
+  .toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
+  .toggle-wrap input:checked + .toggle-slider { background:var(--gold); }
+  .toggle-wrap input:checked + .toggle-slider:before { transform:translateX(20px); }
+  .sfx-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .sfx-card { background:var(--surface2); border:1.5px solid var(--border); border-radius:14px; padding:14px 12px; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:10px; }
+  .sfx-card.active { border-color:var(--gold); background:var(--gold-dim); }
+  .sfx-card:hover { border-color:var(--gold); }
+  .sfx-icon { font-size:24px; flex-shrink:0; }
+  .sfx-info h4 { font-size:13px; font-weight:600; color:var(--text); margin:0 0 3px; }
+  .sfx-info p { font-size:11px; color:var(--text-muted); margin:0; }
+  .sfx-preview { margin-left:auto; background:none; border:1px solid var(--border); border-radius:8px; color:var(--gold); font-size:11px; padding:4px 8px; cursor:pointer; flex-shrink:0; }
+
+  /* ── 일일 목표 ── */
+  .goal-section { background:var(--surface2); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:14px; }
+  .goal-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .goal-label { font-size:13px; color:var(--text-muted); }
+  .goal-count { font-size:13px; font-weight:700; color:var(--gold); }
+  .goal-bar { height:6px; background:var(--border); border-radius:6px; overflow:hidden; }
+  .goal-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:6px; transition:width .4s; }
+  .goal-set-btn { font-size:11px; color:var(--text-muted); background:none; border:1px solid var(--border); border-radius:6px; padding:3px 8px; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
+  .goal-set-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+  /* ── 도전 과제 ── */
+  .achieve-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:flex; align-items:flex-end; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .achieve-modal-overlay.show { opacity:1; pointer-events:all; }
+  .achieve-modal { background:var(--surface); border-radius:24px 24px 0 0; border:1px solid var(--border); width:100%; max-width:480px; max-height:85vh; overflow-y:auto; padding:28px 20px 40px; }
+  .achieve-modal h2 { text-align:center; font-size:18px; color:var(--gold); margin-bottom:4px; }
+  .achieve-subtitle { text-align:center; font-size:12px; color:var(--text-muted); margin-bottom:20px; }
+  .achieve-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .achieve-item { background:var(--surface2); border:1px solid var(--border); border-radius:14px; padding:14px 8px; text-align:center; transition:all .2s; }
+  .achieve-item.unlocked { border-color:var(--gold); background:var(--gold-dim); }
+  .achieve-item.locked { opacity:.45; filter:grayscale(1); }
+  .achieve-icon { font-size:28px; margin-bottom:6px; }
+  .achieve-name { font-size:11px; font-weight:700; color:var(--text); margin-bottom:3px; }
+  .achieve-desc { font-size:10px; color:var(--text-muted); line-height:1.4; }
+
+  /* ── 업적 알림 팝업 ── */
+  .achieve-toast { position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-80px); background:linear-gradient(135deg,var(--gold),var(--gold-light)); border-radius:16px; padding:12px 20px; z-index:9999; display:flex; align-items:center; gap:10px; transition:transform .4s cubic-bezier(.34,1.56,.64,1); pointer-events:none; min-width:200px; }
+  .achieve-toast.show { transform:translateX(-50%) translateY(0); }
+  .achieve-toast-icon { font-size:28px; }
+  .achieve-toast-text h4 { font-size:13px; font-weight:700; color:#0a0a0f; margin:0; }
+  .achieve-toast-text p { font-size:11px; color:rgba(10,10,15,.7); margin:2px 0 0; }
+
+  /* ── 집중 모드 ── */
+  .focus-overlay { position:fixed; inset:0; background:#0a0a0f; z-index:500; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .4s; }
+  .focus-overlay.show { opacity:1; pointer-events:all; }
+  .focus-badge { font-size:11px; letter-spacing:2px; color:var(--text-muted); margin-bottom:24px; text-transform:uppercase; }
+  .focus-mission-icon { font-size:64px; margin-bottom:16px; }
+  .focus-mission-name { font-size:22px; font-weight:700; color:var(--text); text-align:center; margin-bottom:8px; }
+  .focus-mission-desc { font-size:14px; color:var(--text-muted); text-align:center; line-height:1.6; margin-bottom:32px; max-width:320px; }
+  .focus-timer { font-size:48px; font-weight:800; color:var(--gold); font-variant-numeric:tabular-nums; margin-bottom:8px; }
+  .focus-timer-label { font-size:11px; color:var(--text-muted); margin-bottom:32px; letter-spacing:1px; }
+  .focus-input { width:100%; max-width:360px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:14px 16px; color:var(--text); font-size:15px; font-family:'Noto Sans KR',sans-serif; resize:none; margin-bottom:14px; box-sizing:border-box; }
+  .focus-input:focus { outline:none; border-color:var(--gold); }
+  .focus-complete-btn { width:100%; max-width:360px; padding:16px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:14px; color:#0a0a0f; font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:700; cursor:pointer; margin-bottom:10px; }
+  .focus-exit-btn { background:none; border:none; color:var(--text-muted); font-size:13px; cursor:pointer; font-family:'Noto Sans KR',sans-serif; text-decoration:underline; }
+  .focus-progress { display:flex; gap:6px; margin-bottom:24px; }
+  .focus-dot { width:8px; height:8px; border-radius:50%; background:var(--border); transition:background .3s; }
+  .focus-dot.done { background:var(--gold); }
+  .focus-dot.current { background:var(--gold-light); }
+
+  /* ── XP & 레벨 ── */
+  .xp-section { margin:0 0 12px; }
+  .xp-card { background:var(--surface2); border:1px solid var(--border); border-radius:16px; padding:14px 16px; }
+  .xp-card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .xp-name-block { display:flex; align-items:center; gap:7px; }
+  .xp-tier-icon { font-size:24px; }
+  .xp-tier-name { font-size:16px; font-weight:800; color:var(--text); }
+  .xp-lv-num { font-size:12px; color:var(--text-muted); background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:2px 8px; }
+  .xp-next { font-size:11px; color:var(--text-muted); }
+  .xp-bar { height:10px; background:var(--surface); border-radius:10px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px; }
+  .xp-bar-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:10px; transition:width .7s cubic-bezier(.34,1.2,.64,1); }
+  .xp-nums { display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); }
+  .xp-maxlevel-msg { text-align:center; font-size:12px; color:var(--gold); font-weight:700; margin-top:8px; }
+
+  /* ── 집중 챌린지 ── */
+  .fc-section { background:var(--surface2); border:1px solid var(--border); border-radius:18px; padding:18px; margin-bottom:14px; }
+  .fc-default-view { text-align:center; }
+  .fc-badge { display:inline-block; background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:#0a0a0f; font-size:10px; font-weight:800; letter-spacing:1.5px; padding:3px 10px; border-radius:20px; margin-bottom:10px; }
+  .fc-title { font-size:16px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .fc-subtitle { font-size:12px; color:var(--text-muted); margin-bottom:14px; line-height:1.5; }
+  .fc-xp-info { display:flex; justify-content:center; gap:16px; margin-bottom:14px; }
+  .fc-xp-pill { background:var(--gold-dim); border:1px solid var(--gold); border-radius:20px; padding:4px 12px; font-size:11px; color:var(--gold); font-weight:600; }
+  .fc-start-btn { width:100%; padding:13px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:12px; color:#0a0a0f; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:700; cursor:pointer; letter-spacing:.5px; transition:opacity .2s; }
+  .fc-start-btn:hover { opacity:.9; }
+  .fc-start-btn:disabled { opacity:.5; cursor:not-allowed; background:var(--surface); color:var(--text-muted); border:1px solid var(--border); }
+  .fc-cooldown { font-size:12px; color:var(--text-muted); margin-bottom:10px; }
+  .fc-cooldown span { color:var(--gold); font-weight:700; }
+
+  /* 챌린지 진행 화면 */
+  .fc-active-view { display:none; }
+  .fc-timer-wrap { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:16px; }
+  .fc-timer-ring { position:relative; width:72px; height:72px; flex-shrink:0; }
+  .fc-timer-ring svg { transform:rotate(-90deg); }
+  .fc-timer-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:var(--gold); font-variant-numeric:tabular-nums; }
+  .fc-timer-info h3 { font-size:15px; font-weight:700; color:var(--text); margin:0 0 3px; }
+  .fc-timer-info p { font-size:11px; color:var(--text-muted); margin:0; }
+  .fc-mission-list { display:flex; flex-direction:column; gap:8px; }
+  .fc-mission-item { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; cursor:pointer; transition:all .2s; }
+  .fc-mission-item.done { border-color:var(--gold); background:var(--gold-dim); opacity:.7; }
+  .fc-mission-item.active-fc { border-color:var(--gold); }
+  .fc-mission-header { display:flex; align-items:center; gap:8px; }
+  .fc-mission-num { width:22px; height:22px; border-radius:50%; background:var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-muted); flex-shrink:0; }
+  .fc-mission-item.done .fc-mission-num { background:var(--gold); color:#0a0a0f; }
+  .fc-mission-text { font-size:13px; color:var(--text); flex:1; line-height:1.4; }
+  .fc-mission-item.done .fc-mission-text { text-decoration:line-through; color:var(--text-muted); }
+  .fc-mission-xp { font-size:10px; color:var(--gold); font-weight:700; }
+  .fc-mission-expand { padding:10px 0 0; }
+  .fc-mission-ta { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text); font-size:13px; font-family:'Noto Sans KR',sans-serif; resize:none; box-sizing:border-box; }
+  .fc-mission-btn { width:100%; margin-top:8px; padding:10px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; border-radius:8px; color:#0a0a0f; font-weight:700; font-size:13px; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
+  .fc-fail-msg { text-align:center; color:#e55; font-size:13px; margin-top:10px; }
+  .fc-complete-msg { text-align:center; color:var(--gold); font-size:14px; font-weight:700; margin-top:10px; }
+</style>
+</head>
+<body>
+
+
+<!-- ── 로그인 화면 ── -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <h1>MOMENT PICK</h1>
+      <p>오늘의 순간을 특별하게 ✨</p>
+    </div>
+    <div id="authError" class="auth-error"></div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">로그인</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">회원가입</button>
+    </div>
+    <div id="authForm">
+      <div class="auth-field">
+        <label>아이디</label>
+        <input type="text" id="authUsername" placeholder="영문, 숫자, _, - 사용 가능" maxlength="20" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>비밀번호</label>
+        <input type="password" id="authPassword" placeholder="6자 이상" maxlength="50" autocomplete="current-password">
+      </div>
+      <button class="auth-btn" id="authSubmitBtn" onclick="submitAuth()">✦ 로그인</button>
+    </div>
+    <p class="auth-hint">아이디와 비밀번호로 어느 기기에서나<br>내 기록을 이어갈 수 있어요</p>
+    <div class="guest-divider">또는</div>
+    <button class="guest-btn" onclick="tryGuest()">👤 게스트로 이용하기</button>
+  </div>
+</div>
+
+<!-- 게스트 경고 모달 -->
+<div class="guest-warn-overlay" id="guestWarnOverlay">
+  <div class="guest-warn-box">
+    <div class="guest-warn-icon">⚠️</div>
+    <h3>게스트 모드 안내</h3>
+    <p>게스트 모드에서는 모든 기록이<br>이 기기에만 저장돼요.<br><br><strong>앱을 삭제하거나 브라우저 데이터를 지우면<br>모든 기록이 영구적으로 사라져요.</strong><br><br>나중에 회원가입하면 기록을 이어갈 수 없어요.</p>
+    <div class="guest-warn-btns">
+      <button class="guest-warn-confirm" onclick="confirmGuest()">괜찮아요, 게스트로 시작할게요</button>
+      <button class="guest-warn-cancel" onclick="cancelGuest()">로그인 / 회원가입 하기</button>
+    </div>
+  </div>
+</div>
+
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="테마 변경">🌙</button>
+<button class="cal-toggle" id="calToggle" onclick="openCalendar()" title="캘린더">📅</button>
+
+<header>
+  <div class="logo-subtitle">✦ Daily Mission App ✦</div>
+  <div class="logo">MOMENT <span>PICK</span></div>
+  <div class="logo-tagline">오늘의 순간을 특별하게</div>
+  <div class="date-badge">📅 {{ today }}</div>
+  <div class="user-info-bar"><span class="user-name-badge" id="userNameBadge"></span><button class="logout-btn" id="logoutBtn" onclick="logout()" style="display:none">로그아웃</button></div>
+  <div class="guest-mode-bar" id="guestModeBar" style="display:none">👤 게스트 모드 · <a href="#" onclick="showAuthOverlay()" style="color:var(--gold);text-decoration:none">회원가입하면 기록이 유지돼요</a></div>
+  <div class="header-badges"><span class="streak-badge" id="streakBadge">🔥 0일 연속</span><span class="level-badge" id="levelBadge">🌱 씨앗</span></div>
+</header>
+
+<div class="container">
+
+  <div class="xp-section" id="xpSection"></div>
+
+  <div class="quote-section" id="quoteSection"><div class="quote-text" id="quoteText"></div><div class="quote-author" id="quoteAuthor"></div></div>
+
+  <div class="goal-section" id="goalSection">
+    <div class="goal-row">
+      <span class="goal-label">🎯 오늘의 목표</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="goal-count" id="goalCount">0 / 3</span>
+        <button class="goal-set-btn" onclick="openGoalSetting()">변경</button>
+      </div>
+    </div>
+    <div class="goal-bar"><div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>오늘의 달성률</span>
+      <span id="progressText">0 / 0</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- 집중 챌린지 -->
+  <div class="fc-section">
+    <!-- 기본 화면 -->
+    <div class="fc-default-view" id="fcDefaultView">
+      <div class="fc-badge">⚡ FOCUS CHALLENGE</div>
+      <div class="fc-title">5분 집중 챌린지</div>
+      <div class="fc-subtitle">5분 안에 4가지 미션을 클리어하세요<br>일반 미션보다 도전적이에요!</div>
+      <div class="fc-xp-info">
+        <span class="fc-xp-pill">미션 1개 · 15 XP</span>
+        <span class="fc-xp-pill">3시간 쿨다운</span>
+      </div>
+      <div class="fc-cooldown" id="fcCooldownMsg" style="display:none">
+        ⏳ <span id="fcCooldownTime">3:00:00</span> 후 다시 도전 가능
+      </div>
+      <button class="fc-start-btn" id="fcStartBtn" onclick="startFocusChallenge()">⚡ 챌린지 시작</button>
+    </div>
+    <!-- 진행 화면 -->
+    <div class="fc-active-view" id="fcActiveView">
+      <div class="fc-timer-wrap">
+        <div class="fc-timer-ring">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="30" fill="none" stroke="var(--border)" stroke-width="5"/>
+            <circle cx="36" cy="36" r="30" fill="none" stroke="var(--gold)" stroke-width="5"
+              stroke-dasharray="188.5" id="fcRing" stroke-dashoffset="0" stroke-linecap="round"/>
+          </svg>
+          <div class="fc-timer-num" id="fcTimerNum">05:00</div>
+        </div>
+        <div class="fc-timer-info">
+          <h3 id="fcProgressText">0 / 4 완료</h3>
+          <p>미션을 탭해서 완료하세요</p>
+        </div>
+      </div>
+      <div class="fc-mission-list" id="fcMissionList"></div>
+      <div id="fcResultMsg"></div>
+    </div>
+  </div>
+
+  <div class="pick-section">
+    <h3>✨ 오늘의 미션 PICK</h3>
+    <p>버튼을 눌러 오늘의 특별한 미션을 시작하세요</p>
+    <button class="btn-pick" onclick="pickMoment()">✦ PICK MY MOMENT</button>
+    <button class="btn-pick" onclick="startFocusMode()" style="margin-top:8px;background:transparent;border:1px solid var(--gold);color:var(--gold)">🔒 집중 모드</button>
+  </div>
+
+  <div class="cat-filter" id="catFilter"></div>
+  <div class="section-title">▸ 오늘의 미션 목록</div>
+  <div class="missions" id="missionList"></div>
+
+  <div class="add-buttons-row">
+    <button class="btn-add-mission btn-add-manual" onclick="openAddModal()">
+      <span class="btn-add-plus">✏️</span> 직접 미션 추가하기
+    </button>
+    <button class="btn-add-mission btn-add-auto" id="btnAutoAdd" onclick="autoAddMission()">
+      <span class="btn-add-plus">✨</span> 자동 미션 생성하기
+    </button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Completion Modal -->
+<div class="modal-overlay" id="completionModal">
+  <div class="modal">
+    <div class="modal-icon">🏆</div>
+    <h2>모든 미션 완료!</h2>
+    <p>오늘의 모든 순간을 특별하게 만들었어요.<br>내일도 함께해요 ✨</p>
+    <button class="btn-modal-share" onclick="shareCard()">🎴 오늘의 카드 공유하기</button>
+    <button class="btn-modal-share" style="margin-top:8px" onclick="closeModal();openMoodPicker()">😊 오늘의 기분 기록하기</button>
+    <button class="btn-modal" onclick="closeModal()" style="margin-top:8px">닫기</button>
+  </div>
+</div>
+
+<!-- Add Mission Modal -->
+<div class="modal-overlay" id="addMissionModal">
+  <div class="add-modal">
+    <h2>✦ 직접 미션 추가</h2>
+    <div class="add-field">
+      <label>미션 이름</label>
+      <input type="text" id="newMissionName" placeholder="예) 오늘 하루 일기 쓰기" maxlength="30">
+    </div>
+    <div class="add-field">
+      <label>설명 (선택)</label>
+      <textarea id="newMissionDesc" placeholder="미션에 대한 설명을 입력하세요..." maxlength="80"></textarea>
+    </div>
+    <div class="add-field">
+      <label>미션 유형</label>
+      <select id="newMissionType" onchange="togglePlaceholderField(this.value)">
+        <option value="text">✏️ 텍스트 작성</option>
+        <option value="photo">📸 사진 업로드</option>
+        <option value="random">🎲 랜덤 뽑기</option>
+        <option value="check">✅ 단순 체크</option>
+      </select>
+    </div>
+    <div class="add-field" id="placeholderField">
+      <label>입력창 안내문구 (선택)</label>
+      <input type="text" id="newMissionPlaceholder" placeholder="예) 오늘 있었던 일을 자유롭게 써보세요...">
+    </div>
+    <div class="add-field">
+      <label>아이콘 선택</label>
+      <div class="icon-picker" id="iconPicker"></div>
+    </div>
+    <div class="add-modal-buttons">
+      <button class="btn-add-cancel" onclick="closeAddModal()">취소</button>
+      <button class="btn-add-confirm" onclick="confirmAddMission()">✦ 미션 추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Modal -->
+<div class="cal-modal-overlay" id="calModal">
+  <div class="cal-modal">
+    <div class="cal-header">
+      <h2>📅 미션 캘린더</h2>
+      <div class="cal-nav">
+        <button onclick="calPrevMonth()">‹</button>
+        <span id="calMonthLabel"></span>
+        <button onclick="calNextMonth()">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-record" id="calRecord" style="display:none"></div>
+    <button class="cal-close" onclick="closeCalendar()">닫기</button>
+  </div>
+</div>
+
+
+<!-- 기분 모달 -->
+<div class="mood-modal-overlay" id="moodModal">
+  <div class="mood-modal">
+    <h2>오늘의 기분은?</h2>
+    <p>오늘 하루를 한 감정으로 표현해보세요</p>
+    <div class="mood-grid">
+      <button class="mood-btn" onclick="saveMood('😊')">😊</button>
+      <button class="mood-btn" onclick="saveMood('😄')">😄</button>
+      <button class="mood-btn" onclick="saveMood('🤩')">🤩</button>
+      <button class="mood-btn" onclick="saveMood('😌')">😌</button>
+      <button class="mood-btn" onclick="saveMood('😐')">😐</button>
+      <button class="mood-btn" onclick="saveMood('😔')">😔</button>
+      <button class="mood-btn" onclick="saveMood('😴')">😴</button>
+      <button class="mood-btn" onclick="saveMood('😤')">😤</button>
+    </div>
+    <button class="modal-close-btn" onclick="closeMoodModal()">닫기</button>
+  </div>
+</div>
+
+<!-- 통계 모달 -->
+<div class="stats-modal-overlay" id="statsModal">
+  <div class="stats-modal">
+    <h2>📊 나의 통계</h2>
+    <div id="statsContent"></div>
+    <button class="modal-close-btn" onclick="closeStats()">닫기</button>
+  </div>
+</div>
+
+<!-- 루틴 모달 -->
+<div class="routine-modal-overlay" id="routineModal">
+  <div class="routine-modal">
+    <h2>🔄 루틴 미션</h2>
+    <p>매일 반복할 나만의 루틴을 추가해보세요</p>
+    <div id="routineList"></div>
+    <div class="routine-add-row">
+      <input id="routineIcon" class="routine-icon-input" placeholder="🔄" maxlength="2">
+      <input id="routineName" placeholder="루틴 미션 이름 입력..." maxlength="20">
+      <button class="routine-add-btn" onclick="addRoutine()">추가</button>
+    </div>
+    <button class="modal-close-btn" onclick="closeRoutine()">닫기</button>
+  </div>
+</div>
+
+<!-- 온보딩 -->
+<div class="onboarding-overlay" id="onboardingOverlay">
+  <div class="onboard-slide" style="display:flex">
+    <div class="onboard-icon">✨</div>
+    <h2>MOMENT PICK에 오신 걸 환영해요!</h2>
+    <p>매일 새로운 미션으로 오늘 하루를 특별하게 만들어드려요. 작은 습관이 큰 변화를 만들어요.</p>
+    <button class="onboard-next-btn" onclick="nextOnboard()">다음 →</button>
+    <button class="onboard-skip" onclick="skipOnboard()">건너뛰기</button>
+  </div>
+  <div class="onboard-slide">
+    <div class="onboard-icon">🎯</div>
+    <h2>매일 5가지 미션</h2>
+    <p>매일 자동으로 5가지 미션이 준비돼요. 텍스트 작성, 사진 촬영, 체크 등 다양한 방식으로 완료할 수 있어요.</p>
+    <button class="onboard-next-btn" onclick="nextOnboard()">다음 →</button>
+    <button class="onboard-skip" onclick="skipOnboard()">건너뛰기</button>
+  </div>
+  <div class="onboard-slide">
+    <div class="onboard-icon">🔥</div>
+    <h2>스트릭을 쌓아보세요</h2>
+    <p>매일 미션을 완료하면 연속 기록이 쌓여요. 레벨도 올라가고, 나만의 루틴도 만들 수 있어요.</p>
+    <button class="onboard-next-btn" onclick="nextOnboard()">다음 →</button>
+    <button class="onboard-skip" onclick="skipOnboard()">건너뛰기</button>
+  </div>
+  <div class="onboard-slide">
+    <div class="onboard-icon">🚀</div>
+    <h2>준비됐나요?</h2>
+    <p>오늘의 첫 미션을 시작해볼까요? 하루하루 쌓이는 작은 순간들이 당신의 이야기가 돼요.</p>
+    <button class="onboard-next-btn" onclick="nextOnboard()">시작하기 ✨</button>
+  </div>
+  <div id="onboardDot" class="onboard-dot">1 / 4</div>
+</div>
+
+<!-- 하단 네비게이션 -->
+<!-- 더보기 드로어 -->
+<div class="more-drawer-overlay" id="moreDrawerOverlay" onclick="closeMoreDrawer()">
+  <div class="more-drawer" onclick="event.stopPropagation()">
+    <div class="more-drawer-handle"></div>
+    <div class="more-drawer-grid">
+      <div class="more-item" onclick="closeMoreDrawer();openMoodPicker()">
+        <span class="more-item-icon">😊</span><span class="more-item-label">기분</span>
+      </div>
+      <div class="more-item" onclick="closeMoreDrawer();openRoutine()">
+        <span class="more-item-icon">🔄</span><span class="more-item-label">루틴</span>
+      </div>
+      <div class="more-item" onclick="closeMoreDrawer();openThemeModal()">
+        <span class="more-item-icon">🎨</span><span class="more-item-label">테마</span>
+      </div>
+      <div class="more-item" onclick="closeMoreDrawer();openFriendModal()">
+        <span class="more-item-icon">👥</span><span class="more-item-label">친구</span>
+      </div>
+      <div class="more-item" onclick="closeMoreDrawer();openAchieveModal()">
+        <span class="more-item-icon">🏅</span><span class="more-item-label">업적</span>
+      </div>
+      <div class="more-item" onclick="closeMoreDrawer();openSettingsModal()">
+        <span class="more-item-icon">⚙️</span><span class="more-item-label">설정</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navHome" onclick="navTo('home')">
+    <div class="nav-icon">🏠</div><span class="nav-label">홈</span>
+  </button>
+  <button class="nav-btn" id="navCal" onclick="navTo('cal')">
+    <div class="nav-icon">📅</div><span class="nav-label">캘린더</span>
+  </button>
+  <button class="nav-btn" id="navStats" onclick="navTo('stats')">
+    <div class="nav-icon">📊</div><span class="nav-label">통계</span>
+  </button>
+  <button class="nav-btn" id="navFocus" onclick="navTo('focus')">
+    <div class="nav-icon">🔒</div><span class="nav-label">집중</span>
+  </button>
+  <button class="nav-btn" id="navMore" onclick="openMoreDrawer()">
+    <div class="nav-icon">⋯</div><span class="nav-label">더보기</span>
+  </button>
+</nav>
+
+<canvas id="particleCanvas"></canvas>
+
+<!-- 테마 선택 모달 -->
+<div class="theme-modal-overlay" id="themeModal">
+  <div class="theme-modal">
+    <h2>🎨 테마 컬러</h2>
+    <div class="theme-grid" id="themeGrid"></div>
+    <button class="modal-close-btn" onclick="closeThemeModal()" style="margin-top:16px">닫기</button>
+  </div>
+</div>
+
+<!-- 친구 모달 -->
+<div class="friend-modal-overlay" id="friendModal">
+  <div class="friend-modal">
+    <h2>👥 친구 스트릭</h2>
+    <p>코드를 공유해서 친구의 스트릭을 응원해요</p>
+    <div class="my-code-box">
+      <div class="my-code-label">내 친구 코드</div>
+      <div class="my-code-value" id="myFriendCode" onclick="copyFriendCode()">------</div>
+      <div class="my-code-copy">탭해서 복사</div>
+    </div>
+    <div class="friend-add-row">
+      <input id="friendCodeInput" placeholder="친구 코드 입력" maxlength="6">
+      <button class="friend-add-btn" onclick="addFriend()">추가</button>
+    </div>
+    <div id="friendList"></div>
+    <button class="modal-close-btn" onclick="closeFriendModal()">닫기</button>
+  </div>
+</div>
+
+
+<!-- 설정 모달 -->
+<div class="settings-modal-overlay" id="settingsModal">
+  <div class="settings-modal">
+    <h2>⚙️ 설정</h2>
+
+    <div class="settings-section">
+      <div class="settings-label">효과음</div>
+      <div class="settings-row">
+        <span>효과음 사용</span>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="sfxToggle" onchange="toggleSfx(this.checked)" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-section" id="sfxPickerSection">
+      <div class="settings-label">효과음 선택</div>
+      <div class="sfx-grid" id="sfxGrid"></div>
+    </div>
+
+    <button class="modal-close-btn" onclick="closeSettingsModal()">닫기</button>
+  </div>
+</div>
+
+
+<!-- 도전 과제 팝업 -->
+<div class="achieve-toast" id="achieveToast">
+  <div class="achieve-toast-icon" id="achieveToastIcon">🏅</div>
+  <div class="achieve-toast-text">
+    <h4>업적 달성!</h4>
+    <p id="achieveToastName"></p>
+  </div>
+</div>
+
+<!-- 도전 과제 모달 -->
+<div class="achieve-modal-overlay" id="achieveModal">
+  <div class="achieve-modal">
+    <h2>🏅 도전 과제</h2>
+    <p class="achieve-subtitle" id="achieveSubtitle">0 / 0 달성</p>
+    <div class="achieve-grid" id="achieveGrid"></div>
+    <button class="modal-close-btn" style="margin-top:16px" onclick="closeAchieveModal()">닫기</button>
+  </div>
+</div>
+
+<!-- 목표 설정 모달 -->
+<div class="mood-modal-overlay" id="goalModal">
+  <div class="mood-modal">
+    <h2>🎯 오늘의 목표</h2>
+    <p>완료할 미션 수를 선택하세요</p>
+    <div class="mood-grid" style="grid-template-columns:repeat(4,1fr)">
+      <button class="mood-btn" onclick="setGoal(1)" style="font-size:22px;font-family:'Noto Sans KR',sans-serif">1개</button>
+      <button class="mood-btn" onclick="setGoal(2)" style="font-size:22px;font-family:'Noto Sans KR',sans-serif">2개</button>
+      <button class="mood-btn" onclick="setGoal(3)" style="font-size:22px;font-family:'Noto Sans KR',sans-serif">3개</button>
+      <button class="mood-btn" onclick="setGoal(5)" style="font-size:22px;font-family:'Noto Sans KR',sans-serif">5개</button>
+      <button class="mood-btn" onclick="setGoal(7)" style="font-size:22px;font-family:'Noto Sans KR',sans-serif">7개</button>
+      <button class="mood-btn" onclick="setGoal(10)" style="font-size:22px;font-family:'Noto Sans KR',sans-serif">10개</button>
+      <button class="mood-btn" onclick="setGoal(0)" style="font-size:16px;font-family:'Noto Sans KR',sans-serif;grid-column:span 2">목표 없음</button>
+    </div>
+    <button class="modal-close-btn" onclick="closeGoalModal()">닫기</button>
+  </div>
+</div>
+
+<!-- 집중 모드 오버레이 -->
+<div class="focus-overlay" id="focusOverlay">
+  <div class="focus-badge">🔒 집중 모드</div>
+  <div class="focus-progress" id="focusProgress"></div>
+  <div class="focus-mission-icon" id="focusMissionIcon">🎯</div>
+  <div class="focus-mission-name" id="focusMissionName"></div>
+  <div class="focus-mission-desc" id="focusMissionDesc"></div>
+  <div class="focus-timer" id="focusTimer">05:00</div>
+  <div class="focus-timer-label">집중 타이머</div>
+  <textarea class="focus-input" id="focusInput" placeholder="내용을 입력하세요..." rows="3" style="display:none"></textarea>
+  <button class="focus-complete-btn" id="focusCompleteBtn" onclick="focusComplete()">✦ 미션 완료</button>
+  <button class="focus-exit-btn" onclick="exitFocusMode()">집중 모드 종료</button>
+</div>
+
+<footer>MOMENT PICK © 2026</footer>
+
+<script src="/static/extras.js"></script>
+<script>
+// 서버에서 받은 초기 데이터
+let MISSIONS = {{ missions | tojson }};
+let state = {{ state | tojson }};
+
+// ── 진행률 ──
+function getCompletedCount() {
+  return MISSIONS.filter(m => state[String(m.id)] && state[String(m.id)].completed).length;
+}
+
+function updateProgress() {
+  const count = getCompletedCount();
+  const total = MISSIONS.length;
+  document.getElementById('progressText').textContent = `${count} / ${total}`;
+  document.getElementById('progressFill').style.width = total > 0 ? `${(count/total)*100}%` : '0%';
+  if (total > 0 && count === total) {
+    setTimeout(() => document.getElementById('completionModal').classList.add('show'), 600);
+  }
+}
+
+// ── 토스트 ──
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || 'var(--success)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── 미션 토글 ──
+function toggleMission(id) {
+  if (state[String(id)] && state[String(id)].completed) return;
+  var filtered = (typeof getFilteredMissions === 'function') ? getFilteredMissions() : MISSIONS;
+  filtered.forEach(m => {
+    if (m.id !== id && state[String(m.id)]) state[String(m.id)].expanded = false;
+  });
+  if (!state[String(id)]) state[String(id)] = { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
+  state[String(id)].expanded = !state[String(id)].expanded;
+  renderMissions();
+}
+
+// ── 미션 완료 ──
+async function completeMission(id) {
+  const m = MISSIONS.find(x => x.id === id);
+  const s = state[String(id)];
+  let value = '', fileName = '', lucky = null;
+
+  if (m.type === 'text') {
+    const ta = document.getElementById(`textarea-${id}`);
+    value = ta ? ta.value.trim() : '';
+    if (value.length < (m.minLength || 5)) {
+      showToast(`최소 ${m.minLength || 5}자 이상 입력해주세요 ✏️`, '#c97b4c');
+      return;
+    }
+  } else if (m.type === 'photo') {
+    fileName = s.fileName || '';
+    if (!fileName) {
+      showToast('사진을 선택해주세요 📸', '#c97b4c');
+      return;
+    }
+  } else if (m.type === 'random') {
+    lucky = s.lucky;
+    if (!lucky) {
+      showToast('행운 번호를 먼저 뽑아주세요 🎲', '#c97b4c');
+      return;
+    }
+  }
+
+  const res = await fetch('/api/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, value, fileName, lucky })
+  });
+  const data = await res.json();
+  if (data.success) {
+    state[String(id)].completed = true;
+    state[String(id)].expanded = false;
+    showToast(`"${m.name}" 완료! 🎉`);
+    if (typeof triggerParticle === 'function') { var btn = document.querySelector('[onclick="completeMission(' + id + ')"]'); triggerParticle(btn); }
+    if (typeof playSfx === 'function') playSfx();
+    addTotalCompleted();
+    updateStreak();
+    updateProgress();
+    if (typeof pushUserData === "function") pushUserData();
+    renderMissions();
+  }
+}
+
+// ── 행운 번호 ──
+async function pickRandom(id) {
+  const res = await fetch('/api/lucky', { method: 'POST' });
+  const data = await res.json();
+  state[String(id)].lucky = data.number;
+  const box = document.getElementById(`lucky-${id}`);
+  if (box) { box.textContent = `🎉 오늘의 행운 번호: ${data.number}`; box.classList.add('show'); }
+}
+
+// ── 파일 선택 ──
+function handleFileChange(id, input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    state[String(id)].fileName = file.name;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      state[String(id)].previewUrl = e.target.result;
+      const area = document.getElementById(`upload-${id}`);
+      if (!area) return;
+      area.innerHTML = `
+        <div class="photo-preview">
+          <img src="${e.target.result}" alt="업로드 사진">
+          <span class="photo-preview-change" onclick="document.getElementById('photo-${id}').click()">📷 변경</span>
+        </div>`;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// ── 랜덤 PICK ──
+function pickMoment() {
+  const pending = MISSIONS.filter(m => !state[String(m.id)]?.completed);
+  if (pending.length === 0) { showToast('오늘 모든 미션을 완료했어요! 🎉'); return; }
+  const pick = pending[Math.floor(Math.random() * pending.length)];
+  MISSIONS.forEach(m => { if (!state[String(m.id)]?.completed && state[String(m.id)]) state[String(m.id)].expanded = false; });
+  state[String(pick.id)].expanded = true;
+  renderMissions();
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.mission-card');
+    const idx = MISSIONS.findIndex(m => m.id === pick.id);
+    if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+  showToast(`"${pick.name}" 미션이 선택됐어요! ✨`, '#7b6cd4');
+}
+
+// ── 렌더링 ──
+function renderMissions() {
+  const container = document.getElementById('missionList');
+  container.innerHTML = '';
+  MISSIONS.forEach(m => {
+    const s = state[String(m.id)] || { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
+    const card = document.createElement('div');
+    card.className = `mission-card${s.expanded ? ' active' : ''}${s.completed ? ' completed' : ''}`;
+
+    const statusLabel = s.completed ? '완료' : s.expanded ? '진행중' : '대기';
+    const statusClass = s.completed ? 'status-done' : s.expanded ? 'status-active' : 'status-pending';
+    const nameHtml = s.completed ? `<span class="completed-glow">${m.name}</span>` : m.name;
+
+    let expandContent = '';
+    if (s.expanded && !s.completed) {
+      if (m.type === 'text') {
+        expandContent = `
+          <div class="expand-divider"></div>
+          <textarea class="mission-textarea" id="textarea-${m.id}" placeholder="${m.placeholder || ''}" maxlength="500" oninput="updateChar(${m.id})">${s.value || ''}</textarea>
+          <div class="char-count"><span id="char-${m.id}">${(s.value||'').length}</span> / 500</div>
+          <button class="btn-complete" onclick="completeMission(${m.id})">✦ 미션 완료</button>`;
+      } else if (m.type === 'photo') {
+        const previewHtml = s.previewUrl
+          ? `<div class="photo-preview">
+               <img src="${s.previewUrl}" alt="업로드 사진">
+               <span class="photo-preview-change" onclick="document.getElementById('photo-${m.id}').click()">📷 변경</span>
+             </div>`
+          : `<div class="photo-upload-area" id="upload-${m.id}" onclick="document.getElementById('photo-${m.id}').click()">
+               <div class="upload-icon">📷</div>
+               <div class="upload-text">사진을 선택하려면 클릭하세요</div>
+               <div class="upload-hint">JPG, PNG, HEIC 지원</div>
+             </div>`;
+        expandContent = `
+          <div class="expand-divider"></div>
+          <div id="upload-${m.id}">${previewHtml}</div>
+          <input type="file" id="photo-${m.id}" accept="image/*" style="display:none" onchange="handleFileChange(${m.id}, this)">
+          <button class="btn-complete" onclick="completeMission(${m.id})">✦ 미션 완료</button>`;
+      } else if (m.type === 'random') {
+        expandContent = `
+          <div class="expand-divider"></div>
+          <div class="action-card">
+            <p>버튼을 눌러 오늘의 행운 번호를 뽑아보세요!</p>
+            <button class="btn-action" onclick="pickRandom(${m.id})">🎲 번호 뽑기</button>
+            <div class="result-box${s.lucky ? ' show' : ''}" id="lucky-${m.id}">${s.lucky ? `🎉 오늘의 행운 번호: ${s.lucky}` : ''}</div>
+          </div>
+          <button class="btn-complete" onclick="completeMission(${m.id})">✦ 미션 완료</button>`;
+      } else if (m.type === 'check') {
+        expandContent = `
+          <div class="expand-divider"></div>
+          <div class="action-card"><p>미션을 수행했다면 완료 버튼을 눌러주세요!</p></div>
+          <button class="btn-complete" onclick="completeMission(${m.id})">✦ 미션 완료</button>`;
+      }
+    }
+
+    card.innerHTML = `
+      <div class="mission-header" onclick="toggleMission(${m.id})">
+        <div class="mission-icon">${m.icon}</div>
+        <div class="mission-info">
+          <div class="mission-name">${nameHtml}</div>
+          <div class="mission-desc">${m.desc}</div>
+        </div>
+        <div class="mission-status ${statusClass}">${statusLabel}</div>
+      </div>
+      ${expandContent ? `<div class="mission-expand show">${expandContent}</div>` : ''}`;
+    container.appendChild(card);
+  });
+}
+
+function updateChar(id) {
+  const ta = document.getElementById(`textarea-${id}`);
+  const c = document.getElementById(`char-${id}`);
+  if (ta && c) c.textContent = ta.value.length;
+}
+
+// ── 자동 미션 생성 ──
+async function autoAddMission() {
+  const btn = document.getElementById('btnAutoAdd');
+  btn.classList.add('loading');
+  btn.innerHTML = '✨ 생성 중...';
+  btn.disabled = true;
+  await new Promise(r => setTimeout(r, 700));
+  const res = await fetch('/api/auto_mission', { method: 'POST' });
+  const data = await res.json();
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  btn.innerHTML = '<span class="btn-add-plus">✨</span> 자동 미션 생성하기';
+  if (!data.success) {
+    showToast('더 이상 자동 생성할 미션이 없어요 😊', '#c97b4c');
+    return;
+  }
+  const m = data.mission;
+  MISSIONS.push(m);
+  state[String(m.id)] = { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
+  updateProgress();
+  renderMissions();
+  saveCustomMissions();
+  showToast(`"${m.name}" 미션이 생성됐어요! 🎲`, '#7b6cd4');
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.mission-card');
+    if (cards.length) cards[cards.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 150);
+}
+
+// ── 직접 미션 추가 ──
+const ICON_OPTIONS = ['⭐','🔥','💪','🧘','📖','🎨','🎵','🌿','🍀','💡','🏃','🌙','🌈','❤️','🎁','🍵','✍️','🧹','💻','🛁'];
+let selectedIcon = '⭐';
+
+function initIconPicker() {
+  const picker = document.getElementById('iconPicker');
+  picker.innerHTML = '';
+  ICON_OPTIONS.forEach(icon => {
+    const btn = document.createElement('button');
+    btn.className = 'icon-option' + (icon === selectedIcon ? ' selected' : '');
+    btn.textContent = icon;
+    btn.type = 'button';
+    btn.onclick = () => {
+      selectedIcon = icon;
+      document.querySelectorAll('.icon-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    picker.appendChild(btn);
+  });
+}
+
+function togglePlaceholderField(type) {
+  document.getElementById('placeholderField').style.display = type === 'text' ? '' : 'none';
+}
+
+function openAddModal() {
+  document.getElementById('newMissionName').value = '';
+  document.getElementById('newMissionDesc').value = '';
+  document.getElementById('newMissionPlaceholder').value = '';
+  document.getElementById('newMissionType').value = 'text';
+  selectedIcon = '⭐';
+  initIconPicker();
+  togglePlaceholderField('text');
+  document.getElementById('addMissionModal').classList.add('show');
+}
+
+function closeAddModal() { document.getElementById('addMissionModal').classList.remove('show'); }
+
+async function confirmAddMission() {
+  const name = document.getElementById('newMissionName').value.trim();
+  if (!name) { showToast('미션 이름을 입력해주세요 ✏️', '#c97b4c'); return; }
+  const type = document.getElementById('newMissionType').value;
+  const desc = document.getElementById('newMissionDesc').value.trim() || '나만의 특별한 미션';
+  const placeholder = document.getElementById('newMissionPlaceholder').value.trim() || '내용을 입력해주세요...';
+  const res = await fetch('/api/add_mission', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ icon: selectedIcon, name, desc, type, placeholder })
+  });
+  const data = await res.json();
+  if (data.success) {
+    const m = data.mission;
+    MISSIONS.push(m);
+    state[String(m.id)] = { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
+    saveCustomMissions();
+    closeAddModal();
+    updateProgress();
+    renderMissions();
+    showToast(`"${m.name}" 미션이 추가됐어요! ✨`, '#7b6cd4');
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.mission-card');
+      if (cards.length) cards[cards.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  }
+}
+
+// ── 커스텀 미션 저장/불러오기 ──
+function saveCustomMissions() {
+  // id가 100 미만인 것만 커스텀 미션 (100 이상은 데일리 미션)
+  const custom = MISSIONS.filter(m => m.id < 100);
+  const customState = {};
+  custom.forEach(m => { customState[String(m.id)] = state[String(m.id)] || { completed: false, expanded: false, value: '', lucky: null, fileName: '' }; });
+  localStorage.setItem('mp_custom_missions', JSON.stringify(custom));
+  localStorage.setItem('mp_custom_state', JSON.stringify(customState));
+}
+
+function loadCustomMissions() {
+  try {
+    const saved = localStorage.getItem('mp_custom_missions');
+    const savedState = localStorage.getItem('mp_custom_state');
+    if (!saved) return;
+    const customs = JSON.parse(saved);
+    const customState = savedState ? JSON.parse(savedState) : {};
+    customs.forEach(m => {
+      if (!MISSIONS.find(x => x.id === m.id)) {
+        MISSIONS.push(m);
+        state[String(m.id)] = customState[String(m.id)] || { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
+      }
+    });
+  } catch(e) {}
+}
+
+function closeModal() { document.getElementById('completionModal').classList.remove('show'); }
+
+// ── 5분 타이머 ──
+const TIMER_TOTAL = 5 * 60;
+const CIRCUMFERENCE = 2 * Math.PI * 35;
+let timerLeft = TIMER_TOTAL;
+let timerInterval = null;
+let timerRunning = false;
+
+function timerRender() {
+  const m = String(Math.floor(timerLeft / 60)).padStart(2, '0');
+  const s = String(timerLeft % 60).padStart(2, '0');
+  const display = document.getElementById('timerDisplay');
+  const ring = document.getElementById('timerRing');
+  display.textContent = `${m}:${s}`;
+  ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - timerLeft / TIMER_TOTAL);
+  if (timerLeft === 0) {
+    display.className = 'timer-display done';
+    ring.classList.add('done');
+    showToast('⏰ 5분 완료! 수고했어요 🎉', '#4caf82');
+    timerStop();
+  } else if (timerRunning) {
+    display.className = 'timer-display running';
+    ring.classList.remove('done');
+  } else {
+    display.className = 'timer-display paused';
+  }
+}
+
+function timerStart() {
+  if (timerLeft === 0) return;
+  timerRunning = true;
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('btnPause').style.display = '';
+  timerInterval = setInterval(() => { timerLeft--; timerRender(); }, 1000);
+}
+
+function timerPause() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('btnStart').textContent = '▶ 계속';
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnPause').style.display = 'none';
+  timerRender();
+}
+
+function timerStop() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('btnStart').textContent = '▶ 시작';
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnPause').style.display = 'none';
+}
+
+function timerReset() {
+  timerStop();
+  timerLeft = TIMER_TOTAL;
+  document.getElementById('btnStart').textContent = '▶ 시작';
+  document.getElementById('timerRing').classList.remove('done');
+  timerRender();
+}
+
+// ── 초기화 ──
+document.getElementById('timerRing').style.strokeDasharray = CIRCUMFERENCE;
+document.getElementById('timerRing').style.strokeDashoffset = 0;
+
+// state에 expanded 초기화
+MISSIONS.forEach(m => {
+  if (!state[String(m.id)]) state[String(m.id)] = { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
+  state[String(m.id)].expanded = false;
+});
+
+
+
+
+// extras.js에서 MISSIONS/state 덮어씌운 경우 반영
+if (window.MISSIONS) MISSIONS = window.MISSIONS;
+if (window.state) state = window.state;
+// 저장된 커스텀 미션 불러오기
+loadCustomMissions();
+// expanded 초기화
+MISSIONS.forEach(function(m) {
+  if (!state[String(m.id)]) state[String(m.id)] = { completed: false, expanded: false, value: '', lucky: null, fileName: '' };
+  state[String(m.id)].expanded = false;
+});
+timerRender();
+renderMissions();
+updateProgress();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+</script>
+</body>
+</html>
